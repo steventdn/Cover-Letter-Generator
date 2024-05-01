@@ -1,0 +1,4 @@
+server - 
+1. npm init -y (makes package.json)
+2. create server.js file
+3. install express and nodemon
