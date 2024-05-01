@@ -1,94 +1,59 @@
 import React, { useState } from 'react';
 import { Container, Typography, TextField, Button } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 
 function HomePage() {
-  const theme = useTheme();
-  const [inputText, setInputText] = useState('');
+  const [resumeText, setResumeText] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
   const [chatResponse, setChatResponse] = useState('');
 
-  const handleInputChange = (event) => {
-    setInputText(event.target.value);
+  const handleResumeChange = (event) => {
+    setResumeText(event.target.value);
   };
 
-  const handleSendMessage = async () => {
-    console.log('Sending message:', inputText);
+  const handleJobDescriptionChange = (event) => {
+    setJobDescription(event.target.value);
+  };
+
+  const generateCoverLetter = async () => {
+    console.log('Sending resume:', resumeText);
+    console.log('Sending job description:', jobDescription);
     try {
-      const response = await fetch('http://localhost:5000/chat', {
+      const response = await fetch('http://localhost:5000/generate-cover-letter', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ text: inputText })
+        body: JSON.stringify({ resume: resumeText, jobDescription: jobDescription })
       });
       const data = await response.json();
       console.log('Response:', data);
-      setChatResponse(data); // Update state with the response directly
+      // Update state with the generated cover letter
+      setChatResponse(data.coverLetter);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error generating cover letter:', error);
     }
   };
 
   return (
     <Container>
-      <Typography variant="h1" color={theme.palette.primary.main}>
-        Cover Letter Generator
-      </Typography>
-      <Typography variant="body1" color={theme.palette.text.primary}>
-        Paste in the Job Description
-      </Typography>
+      <Typography variant="h4" color="primary">Cover Letter Generator</Typography>
+      <Typography variant="body1" color="textPrimary">Paste in Resume</Typography>
       <TextField
-        type="text"
-        label="Enter your message"
         variant="outlined"
-        value={inputText}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px', width: '300px' }}
+        placeholder="Enter your resume"
+        value={resumeText}
+        onChange={handleResumeChange}
       />
-
-
-        {/* append these three to the chat api */}
-      <Typography variant="body1" color={theme.palette.text.primary}>
-        Paste your Resume
-      </Typography>
+      <Typography variant="body1" color="textPrimary">Job Description</Typography>
       <TextField
-        type="text"
-        label="Enter your message"
         variant="outlined"
-        value={inputText}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px', width: '300px' }}
+        placeholder="Enter job description"
+        value={jobDescription}
+        onChange={handleJobDescriptionChange}
       />
-
-      <Typography variant="body1" color={theme.palette.text.primary}>
-        Tone
-      </Typography>
-      <TextField
-        type="text"
-        label="Enter your message"
-        variant="outlined"
-        value={inputText}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px', width: '300px' }}
-      />
-
-      <Typography variant="body1" color={theme.palette.text.primary}>
-        Word Count
-      </Typography>
-      <TextField
-        type="text"
-        label="Enter your message"
-        variant="outlined"
-        value={inputText}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px', width: '300px' }}
-      />
-
-      <Button variant="contained" onClick={handleSendMessage}>
-        Submit
-      </Button>
+      <Button variant="contained" color="primary" onClick={generateCoverLetter}>Generate Cover Letter</Button>
       {chatResponse && (
-        <Typography variant="body1" color={theme.palette.text.primary}>
+        <Typography variant="body1" color="textPrimary" style={{ whiteSpace: 'pre-wrap' }}>
           {chatResponse}
         </Typography>
       )}

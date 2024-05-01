@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors'); // Import the cors package
+const cors = require('cors');
 const { OpenAI } = require('openai');
 require('dotenv').config();
 
@@ -11,26 +11,36 @@ const openai = new OpenAI({
 });
 
 app.use(express.json());
-app.use(cors()); // Enable CORS middleware
+app.use(cors());
 
-app.get("/", (req, res) => {
-    res.send("Hello, this is your Express server!");
-});
-
-app.post("/chat", async (req, res) => {
-    const { text } = req.body;
+app.post("/generate-cover-letter", async (req, res) => {
+    const { resume, jobDescription } = req.body;
     try {
-        // Make a request to the OpenAI API with the provided text
+        // Make a request to the OpenAI API with the combined prompt
         const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: text }],
-        });
-        // Send the completion data back to the client
-        res.json(response.choices[0].message.content);
-        console.log(response.choices[0].message.content);
+            messages: [
+              {
+                "role": "system",
+                "content": `Write a cover letter based on the following:\n\nResume:\n${resume}\n\nJob Description:\n${jobDescription}\n\n.`
+              },
+            ],
+            temperature: 0.5,
+            max_tokens: 1500,
+            top_p: 1,
+          });
+
+        // Extract the generated cover letter from the completion object
+        const coverLetter = response.choices[0].message.content.trim();
+
+        // Log the generated cover letter
+        console.log("Generated Cover Letter:", coverLetter);
+
+        // Send the cover letter back to the client
+        res.json({ coverLetter });
     } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "An error occurred while processing your request." });
+        console.error("Error generating cover letter:", error);
+        res.status(500).json({ error: "An error occurred while generating the cover letter." });
     }
 });
 
